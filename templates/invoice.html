@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commercial Invoice</title>
+    <style>
+        :root {
+            --primary-color: #f5f5f5;
+            --border-color: #ddd;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #8ca0ac;
+            color: var(--text-color);
+        }
+
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .download-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn:hover {
+            background-color: #45a049;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            page-break-inside: avoid;
+        }
+
+        .logo {
+            max-width: 50px;
+            height: auto;
+        }
+
+        .invoice-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+
+        .detail-group {
+            background-color: var(--primary-color);
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .detail-group p {
+            margin: 5px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            page-break-inside: auto;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-footer-group;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .totals {
+            float: right;
+            width: 300px;
+            page-break-inside: avoid;
+        }
+
+        .totals table {
+            width: 100%;
+        }
+
+        .totals tr:last-child {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .declaration {
+            clear: both;
+            border-top: 1px solid var(--border-color);
+            page-break-inside: avoid;
+        }
+
+        .signature {
+            border-top: 1px solid var(--border-color);
+            padding-top: 90px;
+            font-style: italic;
+            page-break-inside: avoid;
+        }
+
+        .error-message {
+            color: red;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #ffe6e6;
+            border-radius: 4px;
+            display: none;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .invoice-container {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 20px;
+                width: 100%;
+                max-width: none;
+            }
+            
+            .download-btn {
+                display: none;
+            }
+
+            table { page-break-inside: auto; }
+            tr    { page-break-inside: avoid; page-break-after: auto; }
+            thead { display: table-header-group; }
+            tfoot { display: table-footer-group; }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <button id="downloadInvoice" class="download-btn">Download Invoice</button>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <div class="header">
+            <img class="logo" src="{{url_for('static', filename='logo.jpg')}}" alt="Company Logo" />
+            <div id="invoiceInfo">
+                <!-- data coming from JavaScript -->
+            </div>
+        </div>
+
+        <div class="invoice-details">
+            <div class="detail-group">
+                <p><strong>Invoice No:</strong> <span id="invoiceNo"></span></p>
+                <p><strong>Order No:</strong> <span id="orderNo"></span></p>
+                <p><strong>Date:</strong> <span id="invoiceDate"></span></p>
+            </div>
+            <div class="detail-group">
+                <p><strong>Country of Origin:</strong> <span id="originCountry"></span></p>
+                <p><strong>Country of Destination:</strong> <span id="destCountry"></span></p>
+                <p><strong>Terms of Payment:</strong> <span id="paymentTerms"></span></p>
+            </div>
+        </div>
+
+        <table id="itemsTable">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Item Description</th>
+                    <th>Country of Manufacture</th>
+                    <th>Qty</th>
+                    <th>Unit Price ($)</th>
+                    <th>Total Price ($)</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- data coming from js -->
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <table>
+                <tr>
+                    <td>Subtotal</td>
+                    <td id="subtotal"></td>
+                </tr>
+                <tr>
+                    <td>Tax</td>
+                    <td id="tax"></td>
+                </tr>
+                <tr>
+                    <td>Insurance</td>
+                    <td id="insurance"></td>
+                </tr>
+                <tr>
+                    <td>Freight</td>
+                    <td id="freight"></td>
+                </tr>
+                <tr>
+                    <td>Miscellaneous</td>
+                    <td id="misc"></td>
+                </tr>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td id="total"></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="declaration">
+            <p>I declare all the information in this invoice to be true and correct.</p>
+            <div class="signature">
+                <p>Signature over Name and Title</p>
+                <span id="signatureName"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchShippingData(origin, destination) {
+            try {
+                const response = await fetch('/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        question: `What is the shipping rate from ${origin} to ${destination}?`
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch shipping data');
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching shipping data:', error);
+                return null;
+            }
+        }
+
+        async function generateInvoice(freightData) {
+            try {
+                // First get shipping rates
+                const shippingData = await fetchShippingData(
+                    freightData["Origin Port Name"],
+                    freightData["Destination Port Name"]
+                );
+
+                if (!shippingData || !shippingData.response) {
+                    throw new Error('No shipping data available');
+                }
+
+                // Create invoice data structure
+                const invoiceData = {
+                    invoiceNo: "INV-" + new Date().getFullYear() + "-" + Math.random().toString(36).substr(2, 9),
+                    orderNo: "ORD-" + new Date().getFullYear() + "-" + Math.random().toString(36).substr(2, 9),
+                    date: new Date().toISOString().split('T')[0],
+                    
+                    originCountry: freightData["Origin Country"],
+                    destinationCountry: freightData["Destination Country"],
+                    paymentTerms: freightData["Payment Terms"],
+                    
+                    originPort: freightData["Origin Port Name"],
+                    destinationPort: freightData["Destination Port Name"],
+                    
+                    items: [
+                        {
+                            sku: "CARGO-" + freightData["Container Size"],
+                            description: `${freightData["Commodity Description"]} - ${freightData["Container Size"]} Container`,
+                            manufactureCountry: freightData["Origin Country"],
+                            quantity: 1,
+                            unitPrice: parseFloat(freightData["Rate Value"]),
+                            remarks: freightData["Remarks"] || ''
+                        }
+                    ],
+                    
+                    subtotal: parseFloat(freightData["Rate Value"]),
+                    tax: parseFloat(freightData["Additional Charges_Other"] || 0),
+                    insurance: 0,
+                    freight: parseFloat(freightData["THC"] || 0),
+                    miscellaneous: parseFloat(
+                        (freightData["Additional Charges_BAF"] || 0) +
+                        (freightData["Additional Charges_Documentation"] || 0) +
+                        (freightData["Additional Charges_CIC"] || 0) +
+                        (freightData["Additional Charges_EBS"] || 0) +
+                        (freightData["Additional Charges_Security"] || 0) +
+                        (freightData["Additional Charges_ISPS"] || 0)
+                    ),
+                    
+                    signatureName: `logistic compt\nSales Manager`,
+                    
+                    companyInfo: {
+                        name: freightData["Freight Forwarder Name"],
+                        id: freightData["Freight Forwarder ID"],
+                        email: freightData["Contact Email"],
+                        phone: freightData["Contact Phone"],
+                        address: freightData["Address"]
+                    }
+                };
+
+                // Calculate total
+                invoiceData.total = invoiceData.subtotal + invoiceData.tax + 
+                                invoiceData.insurance + invoiceData.freight + 
+                                invoiceData.miscellaneous;
+
+                return invoiceData;
+            } catch (error) {
+                console.error('Error generating invoice:', error);
+                showError('Failed to generate invoice: ' + error.message);
+                return null;
+            }
+        }
+
+        function populateInvoice(data) {
+            document.getElementById('invoiceNo').textContent = data.invoiceNo;
+            document.getElementById('orderNo').textContent = data.orderNo;
+            document.getElementById('invoiceDate').textContent = data.date;
+            document.getElementById('originCountry').textContent = data.originCountry;
+            document.getElementById('destCountry').textContent = data.destinationCountry;
+            document.getElementById('paymentTerms').textContent = data.paymentTerms;
+
+            const tbody = document.querySelector('#itemsTable tbody');
+            tbody.innerHTML = ''; 
+
+            data.items.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.sku}</td>
+                    <td>${item.description}</td>
+                    <td>${item.manufactureCountry}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.unitPrice.toFixed(2)}</td>
+                    <td>${(item.quantity * item.unitPrice).toFixed(2)}</td>
+                    <td>${item.remarks || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('subtotal').textContent = `$${data.subtotal.toFixed(2)}`;
+            document.getElementById('tax').textContent = `$${data.tax.toFixed(2)}`;
+            document.getElementById('insurance').textContent = `$${data.insurance.toFixed(2)}`;
+            document.getElementById('freight').textContent = `$${data.freight.toFixed(2)}`;
+            document.getElementById('misc').textContent = `$${data.miscellaneous.toFixed(2)}`;
+            document.getElementById('total').textContent = `$${data.total.toFixed(2)}`;
+
+            document.getElementById('signatureName').textContent = data.signatureName;
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        async function generatePDF() {
+            try {
+                // Create a clone of the invoice container
+                const invoiceContent = document.querySelector('.invoice-container').cloneNode(true);
+                
+                // Remove the download button and error message from the clone
+                const downloadBtn = invoiceContent.querySelector('.download-btn');
+                if (downloadBtn) {
+                    downloadBtn.remove();
+                }
+                const errorMsg = invoiceContent.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+
+                // Create a new window with just the invoice content
+                const printWindow = window.open('', '', 'height=800,width=800');
+                printWindow.document.write('<html><head><title>Invoice</title>');
+                
+                // Copy over the styles
+                const styles = document.getElementsByTagName('style');
+                for (let style of styles) {
+                    printWindow.document.write(style.outerHTML);
+                }
+                
+                printWindow.document.write('</head><body>');
+                printWindow.document.write(invoiceContent.outerHTML);
+                printWindow.document.write('</body></html>');
+                
+                printWindow.document.close();
+
+                // Wait for content to load
+                printWindow.onload = function() {
+                    // Trigger print dialog
+                    printWindow.print();
+                    
+                    printWindow.onafterprint = function() {
+                        printWindow.close();
+                    };
+                };
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                showError('Failed to generate PDF: ' + error.message);
+            }
+        }
+
+        // Initialize invoice when the page loads
+        async function initializeInvoice(freightData) {
+            const invoiceData = await generateInvoice(freightData);
+            if (invoiceData) {
+                populateInvoice(invoiceData);
+            } else {
+                showError('Failed to generate invoice');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const freightData = {{ freightData|tojson|safe }};
+            console.log('Freight Data:', freightData);
+            
+            initializeInvoice(freightData);
+            
+            document.getElementById('downloadInvoice').addEventListener('click', generatePDF);
+        });
+    </script>
+</body>
+</html>

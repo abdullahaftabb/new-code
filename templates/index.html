@@ -1,286 +1,283 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Shipping Routing</title>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bot</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-      }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-      }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-      .form-group {
-        margin-bottom: 20px;
-      }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #4caf50;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
 
-      label {
-        display: block;
-        font-weight: bold;
-      }
+        .header-container h1 {
+            margin: 0;
+        }
 
-      input,
-      select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
+        .logout-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-      button {
-        background-color: #4caf50;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
+        .logout-button:hover {
+            background-color: #d32f2f;
+        }
 
-      .hidden {
-        display: none;
-      }
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background-color: #f4f4f4;
+            overflow: hidden;
+        }
 
-      .option-item {
-        padding: 8px;
-        cursor: pointer;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        margin-bottom: 4px;
-      }
+        .chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
 
-      .option-item:hover {
-        background-color: #f0f0f0;
-        border-color: #007bff;
-      }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .user,
+        .bot {
+            font-weight: bold;
+            color: #333;
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .input-container input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .input-container button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #4caf50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .input-container button:hover {
+            background-color: #45a049;
+        }
+
+        .loader {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            z-index: 1000;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .message-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .message ul {
+            margin-left: 20px;
+            list-style-type: disc;
+        }
+
+        .message li {
+            margin-bottom: 5px;
+        }
+
+        #question{
+            width: 100%;
+            height: 35px;
+            border-radius: 5px;
+            text-align: left;
+            padding: 7px;
+        }
     </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Shipping Routing</h1>
-      <form id="routing-form">
-        <div class="form-group">
-          <label for="start-location">Start Location:</label>
-          <input
-            type="text"
-            id="start-location"
-            name="start-location"
-            required
-          />
-          <div
-            id="start-location-options"
-            class="hidden"
-            style="
-              max-height: 150px;
-              overflow-y: auto;
-              background-color: #f9f9f9;
-              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            "
-          ></div>
-        </div>
+</head>
 
-        <div class="form-group">
-          <label for="end-location">End Location:</label>
-          <input type="text" id="end-location" name="end-location" required />
-        </div>
-        <div class="form-group">
-          <label for="container-type">Container Type:</label>
-          <select id="container-type" name="container-type" required>
-            <option value="">Select Container Type</option>
-            <option value="40GP">40' General Purpose</option>
-            <option value="45GP">45' General Purpose</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="container-quantity">Container Quantity:</label>
-          <input
-            type="number"
-            id="container-quantity"
-            name="container-quantity"
-            min="1"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="cargo-weight">Cargo Weight (kg):</label>
-          <input
-            type="number"
-            id="cargo-weight"
-            name="cargo-weight"
-            min="1"
-            required
-          />
-        </div>
-        <button type="submit">Search</button>
-      </form>
-      <div id="result-container" class="hidden">
-        <h2>Shipping Offer</h2>
-        <div id="offer-details"></div>
-      </div>
+<body>
+    <div class="header-container">
+        <button class="logout-button" onclick="logout()">Logout</button>
     </div>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            {% for q, a in messages %}
+            <div class="message">
+                <span class="user">You:</span>
+                <div class="message-content">{{ q }}</div>
+            </div>
+            <div class="message">
+                <span class="bot">Bot:</span>
+                <div class="message-content">{{ a|safe }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="input-container" id="input-container">
+            
+            <input type="text" id="question" name="question" placeholder="Type your question here..." required=""></input>
+            <button id="submit-button">Send</button>
+        </div>
+    </div>
+
+    <div class="loader" id="loader"></div>
+
     <script>
-        document.getElementById('start-location').addEventListener('input', function() {
-          const searchQuery = this.value;
+        const chatBox = document.getElementById('chat-box');
+        let input = document.getElementById('question');
+        const submitButton = document.getElementById('submit-button');
+        const loader = document.getElementById('loader');
 
-          console.log("Search Query:", searchQuery);
+        function showLoader() {
+            loader.style.display = 'block';
+        }
 
-          // Only show the options if there is input
-          if (searchQuery.trim() === "") {
-              document.getElementById('start-location-options').classList.add('hidden');
-              return; // Exit early if no input
-          }
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
 
-          fetch(`/location?search=${encodeURIComponent(searchQuery)}`)
-              .then(response => response.json())
-              .then(data => {
-                  console.log(data);
+        function addMessage(type, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            const span = document.createElement('span');
+            span.className = type;
+            span.textContent = type === 'user' ? 'You:' : 'Bot:';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content;
+            messageDiv.appendChild(span);
+            messageDiv.appendChild(contentDiv);
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
-                  const locationOptions = data.locations
-                      .filter(location => location.businessLocode && location.businessLocationName)
-                      .map(location => `
-                          <div class="option-item" style="padding: 8px; cursor: pointer; hover:bg-gray-200;">
-                              ${location.businessLocationName} (${location.standardBusinessLocode})
-                          </div>
-                      `).join('');
-
-                  console.log("Location Options:", locationOptions);
-
-                  const optionsContainer = document.getElementById('start-location-options');
-                  optionsContainer.innerHTML = locationOptions; // Add options to the container
-                  optionsContainer.classList.remove('hidden'); // Show the options list
-              })
-              .catch(error => {
-                  console.log('Error:', error);
-              });
-      });
-
-      // Automatically update input field when a location is selected
-      document.getElementById('start-location-options').addEventListener('click', function(event) {
-          if (event.target && event.target.classList.contains('option-item')) {
-              // Set the input value to the clicked option's text
-              document.getElementById('start-location').value = event.target.innerText;
-
-              // Hide the options list after selection
-              document.getElementById('start-location-options').classList.add('hidden');
-          }
-      });
-
-
-        {% if locations %}
-        console.log("Locations data:", {{ locations | tojson }});
-        {% endif %}
-
-        document.getElementById('end-location').addEventListener('input', function() {
-          const searchQuery = this.value;
-
-          fetch(`/location?search=${encodeURIComponent(searchQuery)}`)
-            .then(response => response.json())
-            .then(data => {
-              const locationOptions = data.locations.map(location => `
-                <option value="${location.businessLocode}">
-                  ${location.businessLocationName} (${location.standardBusinessLocode})
-                </option>
-              `).join('');
-
-              const locationDropdown = document.getElementById('end-location-dropdown');
-              locationDropdown.innerHTML = `
-                <option value="">Select End Location</option>
-                ${locationOptions}
-              `;
-              locationDropdown.classList.remove('hidden');
-            })
-            .catch(error => {
-              console.error('Error:', error);
-            });
-        });
-
-
-        document.getElementById('routing-form').addEventListener('submit', function(e) {
-          e.preventDefault();
-
-          const startLocation = document.getElementById('start-location').value;
-          const endLocation = document.getElementById('end-location').value;
-          const containerType = document.getElementById('container-type').value;
-          const containerQuantity = document.getElementById('container-quantity').value;
-          const cargoWeight = document.getElementById('cargo-weight').value;
-
-
-
-          fetch('/location?search=' + encodeURIComponent(startLocation))
-            .then(response => response.json())
-            .then(data => {
-              const startLocationData = data[0];
-
-              fetch('/location?search=' + encodeURIComponent(endLocation))
-                .then(response => response.json())
-                .then(data => {
-                  const endLocationData = data[0];
-
-                  const offerPayload = {
-                    cargoDetails: {
-                      container: {
-                        amount: containerQuantity,
-                        containerType: containerType,
-                        cargoWeightPerContainer: cargoWeight,
-                        unitOfMeasure: 'KG'
-                      },
-                      commodityGroup: {
-                        name: 'FAK - Freight all Kind',
-                        isHazardous: false
-                      }
-                    },
-                    endLocation: {
-                      name: endLocationData.name,
-                      locode: endLocationData.locode,
-                      haulage: 'CARRIERS_HAULAGE',
-                      postalCode: endLocationData.postalCode,
-                      businessLocode: endLocationData.businessLocode,
-                      country: endLocationData.country,
-                      continent: endLocationData.continent,
-                      locationType: endLocationData.locationType,
-                      portType: endLocationData.portType
-                    },
-                    startLocation: {
-                      name: startLocationData.name,
-                      locode: startLocationData.locode,
-                      haulage: 'CARRIERS_HAULAGE',
-                      businessLocode: startLocationData.businessLocode,
-                      country: startLocationData.country,
-                      continent: startLocationData.continent,
-                      locationType: startLocationData.locationType,
-                      portType: startLocationData.portType
-                    },
-                    validFrom: '2025-01-23T00:00:00+05:00'
-                  };
-
-                  fetch('/offers/offer', {
+        submitButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            const question = input.value.trim();
+            if (question) {
+                addMessage('user', question);
+                showLoader();
+                fetch('/chatbot', {
                     method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(offerPayload)
-                  })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question })
+                })
                     .then(response => response.json())
                     .then(data => {
-                      document.getElementById('result-container').classList.remove('hidden');
-                      document.getElementById('offer-details').textContent = JSON.stringify(data, null, 2);
+                        addMessage('bot', data.response);
+                        input.value = '';
                     })
                     .catch(error => {
-                      console.error('Error:', error);
+                        console.error('Error:', error);
+                        addMessage('bot', 'Sorry, there was an error processing your request.');
+                    })
+                    .finally(() => {
+                        hideLoader();
+                        input.focus();
                     });
-                })
-                .catch(error => {
-                  console.error('Error:', error);
-                });
-            })
-            .catch(error => {
-              console.error('Error:', error);
-            });
+            }
         });
+
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+
+                const question = input.value.trim();
+                if (question) {
+                    addMessage('user', question);
+                    showLoader();
+
+                    fetch('/chatbot', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: question })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            addMessage('bot', data.response);
+                            input.value = '';
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            addMessage('bot', 'Sorry, there was an error processing your request.');
+                        })
+                        .finally(() => {
+                            hideLoader();
+                            input.focus();
+                        });
+                }
+            }
+        });
+
+        function logout() {
+            window.location.href = '/logout';
+        }
+
     </script>
-  </body>
+</body>
+
 </html>
