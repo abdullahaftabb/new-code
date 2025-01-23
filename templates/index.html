@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Shipping Routing</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        font-weight: bold;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .option-item {
+        padding: 8px;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 4px;
+      }
+
+      .option-item:hover {
+        background-color: #f0f0f0;
+        border-color: #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Shipping Routing</h1>
+      <form id="routing-form">
+        <div class="form-group">
+          <label for="start-location">Start Location:</label>
+          <input
+            type="text"
+            id="start-location"
+            name="start-location"
+            required
+          />
+          <div
+            id="start-location-options"
+            class="hidden"
+            style="
+              max-height: 150px;
+              overflow-y: auto;
+              background-color: #f9f9f9;
+              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            "
+          ></div>
+        </div>
+
+        <div class="form-group">
+          <label for="end-location">End Location:</label>
+          <input type="text" id="end-location" name="end-location" required />
+        </div>
+        <div class="form-group">
+          <label for="container-type">Container Type:</label>
+          <select id="container-type" name="container-type" required>
+            <option value="">Select Container Type</option>
+            <option value="40GP">40' General Purpose</option>
+            <option value="45GP">45' General Purpose</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="container-quantity">Container Quantity:</label>
+          <input
+            type="number"
+            id="container-quantity"
+            name="container-quantity"
+            min="1"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="cargo-weight">Cargo Weight (kg):</label>
+          <input
+            type="number"
+            id="cargo-weight"
+            name="cargo-weight"
+            min="1"
+            required
+          />
+        </div>
+        <button type="submit">Search</button>
+      </form>
+      <div id="result-container" class="hidden">
+        <h2>Shipping Offer</h2>
+        <div id="offer-details"></div>
+      </div>
+    </div>
+    <script>
+        document.getElementById('start-location').addEventListener('input', function() {
+          const searchQuery = this.value;
+
+          console.log("Search Query:", searchQuery);
+
+          // Only show the options if there is input
+          if (searchQuery.trim() === "") {
+              document.getElementById('start-location-options').classList.add('hidden');
+              return; // Exit early if no input
+          }
+
+          fetch(`/location?search=${encodeURIComponent(searchQuery)}`)
+              .then(response => response.json())
+              .then(data => {
+                  console.log(data);
+
+                  const locationOptions = data.locations
+                      .filter(location => location.businessLocode && location.businessLocationName)
+                      .map(location => `
+                          <div class="option-item" style="padding: 8px; cursor: pointer; hover:bg-gray-200;">
+                              ${location.businessLocationName} (${location.standardBusinessLocode})
+                          </div>
+                      `).join('');
+
+                  console.log("Location Options:", locationOptions);
+
+                  const optionsContainer = document.getElementById('start-location-options');
+                  optionsContainer.innerHTML = locationOptions; // Add options to the container
+                  optionsContainer.classList.remove('hidden'); // Show the options list
+              })
+              .catch(error => {
+                  console.log('Error:', error);
+              });
+      });
+
+      // Automatically update input field when a location is selected
+      document.getElementById('start-location-options').addEventListener('click', function(event) {
+          if (event.target && event.target.classList.contains('option-item')) {
+              // Set the input value to the clicked option's text
+              document.getElementById('start-location').value = event.target.innerText;
+
+              // Hide the options list after selection
+              document.getElementById('start-location-options').classList.add('hidden');
+          }
+      });
+
+
+        {% if locations %}
+        console.log("Locations data:", {{ locations | tojson }});
+        {% endif %}
+
+        document.getElementById('end-location').addEventListener('input', function() {
+          const searchQuery = this.value;
+
+          fetch(`/location?search=${encodeURIComponent(searchQuery)}`)
+            .then(response => response.json())
+            .then(data => {
+              const locationOptions = data.locations.map(location => `
+                <option value="${location.businessLocode}">
+                  ${location.businessLocationName} (${location.standardBusinessLocode})
+                </option>
+              `).join('');
+
+              const locationDropdown = document.getElementById('end-location-dropdown');
+              locationDropdown.innerHTML = `
+                <option value="">Select End Location</option>
+                ${locationOptions}
+              `;
+              locationDropdown.classList.remove('hidden');
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        });
+
+
+        document.getElementById('routing-form').addEventListener('submit', function(e) {
+          e.preventDefault();
+
+          const startLocation = document.getElementById('start-location').value;
+          const endLocation = document.getElementById('end-location').value;
+          const containerType = document.getElementById('container-type').value;
+          const containerQuantity = document.getElementById('container-quantity').value;
+          const cargoWeight = document.getElementById('cargo-weight').value;
+
+
+
+          fetch('/location?search=' + encodeURIComponent(startLocation))
+            .then(response => response.json())
+            .then(data => {
+              const startLocationData = data[0];
+
+              fetch('/location?search=' + encodeURIComponent(endLocation))
+                .then(response => response.json())
+                .then(data => {
+                  const endLocationData = data[0];
+
+                  const offerPayload = {
+                    cargoDetails: {
+                      container: {
+                        amount: containerQuantity,
+                        containerType: containerType,
+                        cargoWeightPerContainer: cargoWeight,
+                        unitOfMeasure: 'KG'
+                      },
+                      commodityGroup: {
+                        name: 'FAK - Freight all Kind',
+                        isHazardous: false
+                      }
+                    },
+                    endLocation: {
+                      name: endLocationData.name,
+                      locode: endLocationData.locode,
+                      haulage: 'CARRIERS_HAULAGE',
+                      postalCode: endLocationData.postalCode,
+                      businessLocode: endLocationData.businessLocode,
+                      country: endLocationData.country,
+                      continent: endLocationData.continent,
+                      locationType: endLocationData.locationType,
+                      portType: endLocationData.portType
+                    },
+                    startLocation: {
+                      name: startLocationData.name,
+                      locode: startLocationData.locode,
+                      haulage: 'CARRIERS_HAULAGE',
+                      businessLocode: startLocationData.businessLocode,
+                      country: startLocationData.country,
+                      continent: startLocationData.continent,
+                      locationType: startLocationData.locationType,
+                      portType: startLocationData.portType
+                    },
+                    validFrom: '2025-01-23T00:00:00+05:00'
+                  };
+
+                  fetch('/offers/offer', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(offerPayload)
+                  })
+                    .then(response => response.json())
+                    .then(data => {
+                      document.getElementById('result-container').classList.remove('hidden');
+                      document.getElementById('offer-details').textContent = JSON.stringify(data, null, 2);
+                    })
+                    .catch(error => {
+                      console.error('Error:', error);
+                    });
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                });
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        });
+    </script>
+  </body>
+</html>
