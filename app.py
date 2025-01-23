@@ -38,7 +38,7 @@ load_dotenv()
 app=Flask(__name__)
 app.secret_key = os.urandom(24) 
 app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/rankvizdatabase'
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/salesdatabase'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'ethicalgan@gmail.com'
