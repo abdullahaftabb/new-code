@@ -14,3 +14,4 @@ langchain_groq
 pyjwt
 Flask-Session
 playwright
+pydantic == 2.10.5
