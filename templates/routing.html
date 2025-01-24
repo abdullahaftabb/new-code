@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Routing Form</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+      }
+
+      .mainView {
+        margin-bottom: 20px;
+      }
+
+      h3 {
+        margin-bottom: 10px;
+        font-size: 1.2em;
+        color: #333;
+      }
+
+      .subTxt {
+        margin-bottom: 5px;
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .inptBox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 5px;
+      }
+
+      .icon {
+        font-size: 1.2em;
+        color: #007bff;
+      }
+
+      input {
+        font-size: 0.9em;
+      }
+
+      .dateMain {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      .customDatePicker {
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 4px;
+        margin-left: 10px;
+      }
+
+      .dropdownSection {
+        margin-bottom: 10px;
+      }
+
+      .dropdown {
+        width: 100%;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .btn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+      }
+
+      .btn:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="mainView">
+        <h3>Routing</h3>
+        <div class="sections">
+          <div class="section">
+            <p class="subTxt">Start Location</p>
+            <div class="inptBox">
+              <span class="icon">&#x1F4CD;</span>
+              <input
+                style="
+                  width: 90%;
+                  border: none;
+                  outline: none;
+                  margin-left: 5px;
+                "
+                type="text"
+                id="start-location"
+                placeholder="Enter Start Location"
+              />
+            </div>
+            <label>
+              <input type="radio" name="startOption" value="option1" /> Received
+              at Your Door
+            </label>
+            <label>
+              <input type="radio" name="startOption" value="option2" /> Received
+              at Terminal/Ramp
+            </label>
+          </div>
+
+          <div class="section">
+            <p class="subTxt">End Location</p>
+            <div class="inptBox">
+              <span class="icon">&#x1F4CD;</span>
+              <input
+                style="
+                  width: 90%;
+                  border: none;
+                  outline: none;
+                  margin-left: 5px;
+                "
+                type="text"
+                id="end-location"
+                placeholder="Enter End Location"
+              />
+            </div>
+            <label>
+              <input type="radio" name="endOption" value="option3" /> Delivered
+              at Your Door
+            </label>
+            <label>
+              <input type="radio" name="endOption" value="option4" /> Delivered
+              at Terminal/Ramp
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mainView">
+        <h3>Validity Date</h3>
+        <p class="subTxt">Valid From</p>
+        <div class="dateMain">
+          <span class="icon">&#x1F4C5;</span>
+          <input type="date" class="customDatePicker" />
+        </div>
+      </div>
+
+      <div class="mainView">
+        <h3>Container and Commodity</h3>
+        <div class="sections">
+          <div class="dropdownSection">
+            <p class="subTxt">Container Type</p>
+            <select class="dropdown">
+              <option value="20-general-purpose">20' General Purpose</option>
+              <option value="40-general-purpose">40' General Purpose</option>
+              <option value="40-general-purpose-high-cube">
+                40' General Purpose High Cube
+              </option>
+              <option value="20-operating-reefer">20' Operating Reefer</option>
+              <option value="40-operating-reefer">40' Operating Reefer</option>
+              <option value="40-non-operating-reefer">
+                40' Non-operating Reefer
+              </option>
+              <option value="20-open-top-in-gauge">
+                20' Open Top (in-gauge)
+              </option>
+              <option value="40-open-top-in-gauge">
+                40' Open Top (in-gauge)
+              </option>
+              <option value="20-flatrack-in-gauge">
+                20' Flatrack (in-gauge)
+              </option>
+              <option value="40-flatrack-in-gauge">
+                40' Flatrack (in-gauge)
+              </option>
+              <option value="40-high-cube-flatrack-in-gauge">
+                40' High Cube Flatrack (in-gauge)
+              </option>
+              <option value="20-high-cube-open-top-in-gauge">
+                20' High Cube Open Top (in-gauge)
+              </option>
+              <option value="40-high-cube-open-top-in-gauge">
+                40' High Cube Open Top (in-gauge)
+              </option>
+              <option value="40-high-cube-hard-top-in-gauge">
+                40' High Cube Hard Top (in-gauge)
+              </option>
+            </select>
+          </div>
+
+          <div class="dropdownSection">
+            <p class="subTxt">Container Quantity</p>
+            <input
+              style="width: 90%; border: none; outline: none; margin-left: 5px;"
+              type="number"
+              id="quantity"
+              placeholder="Enter Container Quantity"
+            />
+          </div>
+
+          <div class="dropdownSection">
+            <p class="subTxt">Weight per Container</p>
+            <input
+              style="width: 90%; border: none; outline: none; margin-left: 5px"
+              type="number"
+              id="weight"
+              placeholder="Enter Weight per Container"
+            />
+          </div>
+
+          <div>
+            <p class="subTxt">Select Units</p>
+            <label><input type="radio" name="unit" value="kg" /> Kg</label>
+            <label><input type="radio" name="unit" value="lb" /> Lb</label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="freight_details()">Submit</button>
+    </div>
+    <script>
+
+      function freight_details() {
+        window.location.href = '/freight_datails';
+    }
+
+
+      document
+        .getElementById("start-location")
+        .addEventListener("input", function () {
+          const searchQuery = this.value;
+          const inputField = this;
+          const optionsContainer = document.createElement("div");
+          optionsContainer.id = "start-location-options";
+          optionsContainer.style.cssText = `
+          max-height: 150px;
+          overflow-y: auto;
+          background-color: #f9f9f9;
+          box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+          position: absolute;
+          z-index: 10;
+      `;
+          optionsContainer.style.width = `${inputField.offsetWidth}px`;
+          if (searchQuery.trim() === "") {
+            const existingContainer = document.getElementById(
+              "start-location-options"
+            );
+            if (existingContainer) {
+              existingContainer.remove();
+            }
+            return;
+          }
+
+          fetch(`/location?search=${encodeURIComponent(searchQuery)}`)
+            .then((response) => response.json())
+            .then((data) => {
+              // Filter and map locations
+              const locationOptions = data.locations
+                .filter(
+                  (location) =>
+                    location.businessLocode && location.businessLocationName
+                )
+                .map((location) => {
+                  const optionElement = document.createElement("div");
+                  optionElement.className = "option-item";
+                  optionElement.style.cssText = `
+                          padding: 8px;
+                          cursor: pointer;
+                      `;
+                  optionElement.addEventListener("mouseover", function () {
+                    this.style.backgroundColor = "#f0f0f0";
+                  });
+                  optionElement.addEventListener("mouseout", function () {
+                    this.style.backgroundColor = "";
+                  });
+                  optionElement.textContent = `${location.businessLocationName} (${location.standardBusinessLocode})`;
+                  return optionElement;
+                });
+
+              // Remove any existing options container
+              const existingContainer = document.getElementById(
+                "start-location-options"
+              );
+              if (existingContainer) {
+                existingContainer.remove();
+              }
+              if (locationOptions.length > 0) {
+                locationOptions.forEach((option) =>
+                  optionsContainer.appendChild(option)
+                );
+
+                // Insert the options container after the input
+                const inputContainer = document.querySelector(".inptBox");
+                inputContainer.parentNode.insertBefore(
+                  optionsContainer,
+                  inputContainer.nextSibling
+                );
+
+                // Add click event to select location
+                optionsContainer.addEventListener("click", function (event) {
+                  if (event.target.classList.contains("option-item")) {
+                    // Set the input value to the clicked option's text
+                    document.getElementById("start-location").value =
+                      event.target.textContent;
+
+                    // Remove the options container
+                    optionsContainer.remove();
+                  }
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+
+      /// End Location
+      document
+        .getElementById("end-location")
+        .addEventListener("input", function () {
+          const searchQuery = this.value;
+          const inputField = this; // Reference to the input field
+          const optionsContainer = document.createElement("div");
+          optionsContainer.id = "end-location-options";
+          optionsContainer.style.cssText = `
+        max-height: 150px;
+        overflow-y: auto;
+        background-color: #f9f9f9;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        position: absolute;
+        z-index: 13;
+    `;
+          optionsContainer.style.width = `${inputField.offsetWidth}px`;
+
+          if (searchQuery.trim() === "") {
+            const existingContainer = document.getElementById(
+              "end-location-options"
+            );
+            if (existingContainer) {
+              existingContainer.remove();
+            }
+            return;
+          }
+
+          fetch(`/location?search=${encodeURIComponent(searchQuery)}`)
+            .then((response) => response.json())
+            .then((data) => {
+              // Filter and map locations
+              const locationOptions = data.locations
+                .filter(
+                  (location) =>
+                    location.businessLocode && location.businessLocationName
+                )
+                .map((location) => {
+                  const optionElement = document.createElement("div");
+                  optionElement.className = "option-item";
+                  optionElement.style.cssText = `
+                        padding: 8px;
+                        cursor: pointer;
+                    `;
+                  optionElement.addEventListener("mouseover", function () {
+                    this.style.backgroundColor = "#f0f0f0";
+                  });
+                  optionElement.addEventListener("mouseout", function () {
+                    this.style.backgroundColor = "";
+                  });
+                  optionElement.textContent = `${location.businessLocationName} (${location.standardBusinessLocode})`;
+                  return optionElement;
+                });
+
+              // Remove any existing options container
+              const existingContainer = document.getElementById(
+                "end-location-options"
+              );
+              if (existingContainer) {
+                existingContainer.remove();
+              }
+
+              if (locationOptions.length > 0) {
+                locationOptions.forEach((option) =>
+                  optionsContainer.appendChild(option)
+                );
+
+                // Insert the options container specifically after the end-location input's container
+                const endLocationInputContainer = document
+                  .querySelector("#end-location")
+                  .closest(".inptBox");
+                endLocationInputContainer.parentNode.insertBefore(
+                  optionsContainer,
+                  endLocationInputContainer.nextSibling
+                );
+
+                // Add click event to select location
+                optionsContainer.addEventListener("click", function (event) {
+                  if (event.target.classList.contains("option-item")) {
+                    // Set the input value to the clicked option's text
+                    document.getElementById("end-location").value =
+                      event.target.textContent;
+                    optionsContainer.remove();
+                  }
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+      function showTime() {
+        document.getElementById("currentTime").innerHTML =
+          new Date().toUTCString();
+      }
+      showTime();
+      setInterval(function () {
+        showTime();
+      }, 1000);
+    </script>
+  </body>
+</html>

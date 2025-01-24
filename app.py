@@ -19,25 +19,12 @@ from typing import Optional
 from pydantic import BaseModel, Field
 import json
 import requests
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-import time
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from flask_session import Session
 
 load_dotenv()
 
 app=Flask(__name__)
-app.secret_key = os.urandom(24) 
-app.config['SECRET_KEY'] = 'your_secret_key'
+app.secret_key = 'your_secret_key'
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/salesdatabase'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -45,11 +32,30 @@ app.config['MAIL_USERNAME'] = 'ethicalgan@gmail.com'
 app.config['MAIL_PASSWORD'] = 'rehg hjfx tauh zrof'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.secret_key = "supersecretkey"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
 mongo = PyMongo(app)
 mail = Mail(app)
+Session(app)
 
+@app.route('/set_token', methods=['POST'])
+def set_token():
+    print('Session before setting token:', session)
+    data = request.get_json()
+    if 'x-token' not in data:
+        return jsonify({'error': 'x-token is required'}), 400
+    session['x_token'] = data['x-token']
+    print('Session after setting token:', session)
+    return jsonify({'message': 'x-token set successfully'}), 200
 
+@app.route('/get_token', methods=['GET'])
+def get_token():
+    print('Session in get_token:', session) 
+    x_token = session.get('x_token')
+    if x_token:
+        return jsonify({'x_token': x_token}), 200
+    else:
+        return jsonify({'error': 'x-token not found in session'}), 404
 
 @app.route('/location', methods=['GET', 'POST'])
 def get_location():
@@ -63,7 +69,7 @@ def get_location():
     
     url = "https://locations.api.hlag.cloud/api/locations"
     headers = {
-        "x-token": 'eyJhbGciOiJSUzI1NiIsImtpZCI6InpaX3V5cWNMZEwtZFZSaTdkclRPbEZIMEctazJ2M2MtYnJ1bVJERVdwSVUiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3Mzc2NDM4NTYsIm5iZiI6MTczNzYzMzA1NiwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9obGFnd2VicHJvZC5iMmNsb2dpbi5jb20vNjNkZjhlNzEtMDYxMi00OTMyLWE2ZGUtMmEwZjVhYTNjNzhjL3YyLjAvIiwic3ViIjoiVTQwNzk2NSIsImF1ZCI6IjY0ZDdhNDRiLTFjNWItNGI1Mi05ZmY5LTI1NGY3YWNkOGZjMCIsImFjciI6ImIyY18xYV9zaWdudXBfc2lnbmluIiwibm9uY2UiOiIwMTk0OTJmZS00N2FiLTc2ZjYtYjUxNy01ODY0NzFkZjI1NGEiLCJpYXQiOjE3Mzc2MzMwNTYsImF1dGhfdGltZSI6MTczNzYzMzA1MywianRpIjoiZDgyZjcyNmEtMWJjZC00NzQ4LWFhNzctOGZkNjJjNmVkZGU2IiwibmV3VXNlciI6dHJ1ZSwiam9iVGl0bGUiOiJib29rZXIiLCJleHRlbnNpb25fVUlEIjoiVTQwNzk2NSIsInRpZCI6IjYzZGY4ZTcxLTA2MTItNDkzMi1hNmRlLTJhMGY1YWEzYzc4YyIsInBhc3N3b3JkRXhwaXJlZCI6ZmFsc2V9.Mvmvht_Tvo0h2tkna0l_UHKkaYHvN7ltbWKtE8FsGVu9DTdZL-4gnYxWW-3TnZA6IXnwrab1V0eIUv1MNGsFC8kCbKMKo-hzcN6txB9xTARohrjYMvwqDmhRF-AkeMHZ03Mpss84FxqCHefJ0qkYfysFFpc6riPcbUE0TDt2wlRL1TAsURDXEtf9uMoIIea1RumF-pQW3h-X86BChzHCkCk6Y69qqNOZKtYwS-NyTCFYP93sM8ut69GnsdnV_cmc3-W8Gbe-7Tl9vUSL3etFAgkx0oF2hemK5ZyyqKiRLVN7OUZ3eUEwA3ptrl8k7SXoA1Og1vcksjJe4gkZ1_TMCw',
+        "x-token": 'eyJhbGciOiJSUzI1NiIsImtpZCI6InpaX3V5cWNMZEwtZFZSaTdkclRPbEZIMEctazJ2M2MtYnJ1bVJERVdwSVUiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3Mzc3MjUyODEsIm5iZiI6MTczNzcxNDQ4MSwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9obGFnd2VicHJvZC5iMmNsb2dpbi5jb20vNjNkZjhlNzEtMDYxMi00OTMyLWE2ZGUtMmEwZjVhYTNjNzhjL3YyLjAvIiwic3ViIjoiVTQwNzY5NCIsImF1ZCI6IjY0ZDdhNDRiLTFjNWItNGI1Mi05ZmY5LTI1NGY3YWNkOGZjMCIsImFjciI6ImIyY18xYV9zaWdudXBfc2lnbmluIiwibm9uY2UiOiIwMTk0OTdkYS05NTM5LTdiNGMtOGE4Mi0xYTVlNmEzNjE0MmEiLCJpYXQiOjE3Mzc3MTQ0ODEsImF1dGhfdGltZSI6MTczNzcxNDQ3OCwianRpIjoiZTY2YTFiOWItNmJkNy00MTgyLWIxMzItNDhjOGY2NzhmMmUyIiwiam9iVGl0bGUiOiJkb2N1bWVudC1tYW5hZ2VyIiwiZXh0ZW5zaW9uX1VJRCI6IlU0MDc2OTQiLCJ0aWQiOiI2M2RmOGU3MS0wNjEyLTQ5MzItYTZkZS0yYTBmNWFhM2M3OGMiLCJwYXNzd29yZEV4cGlyZWQiOmZhbHNlfQ.PM3Kd8V84HlIPpZt0l8v3AJl8vO-fv8pHP_vedAVh0gYAP7VtxJnx5UE5e7WPHIkDBk_MpiPisC0WYuFM4TM6wltpZPq5zSRvsgA7z46DB_iAMdBNKBJP8Id2gExUTfMi04y4j3QVm1twRg22Y8okA8a6_lELgreBedXsrGgSA4aDYqR-YEBLlMwv8a6GCtE-j2IprvUjliTln0MRO1fP4THEjqWwFBErqQtpanjwZ30uW61kKaMqcdYZ76HN96VjmY_T4rOzOxvNf7llDTMxOHnyo6iT4zfBpdUJHNK07IPH0wrqDg-n3lmVuTkqVN6kwtT4uRG3WgL3y09BkB7vw',
     }
     params = {
         "search": search_query,
@@ -142,6 +148,17 @@ def logout():
     session.clear()
     flash('You have been logged out.')
     return redirect(url_for('home'))
+
+
+@app.route('/route')
+def route():
+    print('going towrds the quota page')
+    return render_template('routing.html')
+
+@app.route('/freight_datails')
+def freight_datails():
+    print('going towrds the quota page')
+    return render_template('freight_datails.html')
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -473,58 +490,6 @@ def invoice():
 
 
 
-def setup_driver():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
-    
-    return webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=chrome_options
-    )
-
-@app.route('/scrape', methods=['POST'])
-def scrape_website():
-    driver = setup_driver()
-    
-    try:
-        url = request.json.get('url', "https://www.jctrans.com/en/inquiry/freightinquiry?targetCountryId=94&targetCityId=1790&cargoType=Dangerous+Goods,Projects,General,Reefer+Container,Personal+Cargo,Special+Cargo,Others,eCommerce&transportType=LCL&lineId=20000000")
-        
-        driver.get(url)
-        time.sleep(5)
-
-        items = []
-        try:
-            WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "wrapper-content"))
-            )
-            
-            item_elements = driver.find_elements(By.XPATH, "//div[contains(@class, 'wrapper-content')]//div[contains(@class, 'item')]")
-            
-            for item in item_elements:
-                text = item.text.strip()
-                class_name = item.get_attribute("class")
-                if text:
-                    items.append({
-                        "text": text,
-                        "class": class_name
-                    })
-
-        except TimeoutException:
-            return jsonify({"error": "Timed out waiting for page content."}), 408
-        except NoSuchElementException:
-            return jsonify({"error": "Could not find the elements."}), 404
-
-        return jsonify({"items": items})
-    
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
-    finally:
-        driver.quit()
 
 if __name__ == '__main__':
     app.run(port=8006, debug=True)

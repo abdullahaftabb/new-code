@@ -12,3 +12,5 @@ webdriver_manager == 4.0.2
 requests
 langchain_groq
 pyjwt
+Flask-Session
+playwright
